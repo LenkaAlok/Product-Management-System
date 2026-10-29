@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 
 @Getter
@@ -27,7 +27,9 @@ public class User {
     private String email;
 
 
-    @NotBlank(message = "Password is required")
+
+
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 

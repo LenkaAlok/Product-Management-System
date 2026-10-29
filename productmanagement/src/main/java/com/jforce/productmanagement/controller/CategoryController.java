@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
     // Create a category
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping
     public ResponseEntity<Category> createCategory(
             @Valid @RequestBody Category category) {
@@ -39,13 +41,14 @@ public class CategoryController {
     }
 
     // Update a category
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Category> updateCategory(
             @PathVariable Long id,
             @Valid @RequestBody Category category) {
         return ResponseEntity.ok(categoryService.updateCategory(id, category));
     }
-
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     // Delete a category
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {

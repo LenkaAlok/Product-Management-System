@@ -9,6 +9,8 @@ import com.jforce.productmanagement.entity.User;
 import com.jforce.productmanagement.repository.RoleRepository;
 import com.jforce.productmanagement.repository.UserRepository;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +21,15 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    //private final AuthenticationManager authenticationManager;
+
+    // Constructor injection
     public AuthService(
             UserRepository userRepository,
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService) {
+            JwtService jwtService,
+            AuthenticationManager authenticationManager) {
 
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -31,42 +37,59 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+    // Register a normal USER
     public UserResponseDto register(RegisterRequestDto request) {
+
+        // Check whether the email is already registered
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email is already registered");
         }
+
+        // Find the USER role
         Role userRole = roleRepository.findByName("USER")
                 .orElseThrow(() ->
-                        new RuntimeException("USER role not found in database"));
+                        new RuntimeException("USER role not found"));
+
+        // Create the user
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        // Encrypt the password before saving
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword()));
 
         user.setRole(userRole);
+
+        // Save the user in the database
         User savedUser = userRepository.save(user);
 
+        // Return user details without the password
         return convertToUserResponse(savedUser);
     }
 
+    // Login a normal USER
     public AuthResponseDto login(LoginRequestDto request) {
+
+        // Find the user by email
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
                         new RuntimeException("Invalid email or password"));
 
-        // Compare the submitted password with the stored BCrypt hash
+        // Compare the entered password with the stored encoded password
         if (!passwordEncoder.matches(
-                request.getPassword(), user.getPassword())) {
+                request.getPassword(),
+                user.getPassword())) {
 
             throw new RuntimeException("Invalid email or password");
         }
 
+        // Generate the JWT using the email and role
         String token = jwtService.generateToken(
                 user.getEmail(),
-                user.getRole().getName()
-        );
+                user.getRole().getName());
 
+        // Create the login response
         AuthResponseDto response = new AuthResponseDto();
         response.setMessage("Login successful");
         response.setToken(token);
@@ -76,7 +99,7 @@ public class AuthService {
         return response;
     }
 
-    // Convert the User entity into a safe response DTO
+    // Convert User entity into a safe response DTO
     private UserResponseDto convertToUserResponse(User user) {
 
         UserResponseDto response = new UserResponseDto();
@@ -85,7 +108,7 @@ public class AuthService {
         response.setName(user.getName());
         response.setEmail(user.getEmail());
         response.setRole(user.getRole().getName());
+
         return response;
     }
 }
-

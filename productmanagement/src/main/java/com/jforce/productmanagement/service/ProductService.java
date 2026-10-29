@@ -27,14 +27,20 @@ public class ProductService {
     }
 
     public Product updateProduct(Long id, Product updatedProduct) {
-
         Product existingProduct = getProductById(id);
 
         existingProduct.setName(updatedProduct.getName());
         existingProduct.setDescription(updatedProduct.getDescription());
         existingProduct.setPrice(updatedProduct.getPrice());
-        existingProduct.setCategory(updatedProduct.getCategory());
+        if (updatedProduct.getCategory() != null
+                && updatedProduct.getCategory().getId() != null) {
 
+            Category category = categoryRepository
+                    .findById(updatedProduct.getCategory().getId())
+                    .orElseThrow(() ->
+                            new RuntimeException("Category not found"));
+            existingProduct.setCategory(category);
+        }
         return productRepository.save(existingProduct);
     }
 
