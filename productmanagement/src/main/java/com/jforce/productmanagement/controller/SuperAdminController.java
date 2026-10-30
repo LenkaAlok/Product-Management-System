@@ -9,7 +9,10 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/super-admin")
@@ -44,6 +47,37 @@ public class SuperAdminController {
                 superAdminService.loginSuperAdmin(request);
 
         return ResponseEntity.ok(response);
+    }
+    // Get all registered users.
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+
+        return ResponseEntity.ok(
+                superAdminService.getAllUsers());
+    }
+
+
+    // Get user by ID.
+    @GetMapping("/users/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<UserResponseDto> getUserById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                superAdminService.getUserById(id));
+    }
+
+
+    // Delete a user by ID.
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<String> deleteUser(
+            @PathVariable Long id) {
+
+        superAdminService.deleteUser(id);
+
+        return ResponseEntity.ok("User deleted successfully");
     }
 }
 

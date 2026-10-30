@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class SuperAdminService {
 
@@ -118,6 +120,56 @@ public class SuperAdminService {
         userResponse.setRole(user.getRole().getName());
 
         response.setUser(userResponse);
+
+        return response;
+    }
+    // Get all users.
+    public List<UserResponseDto> getAllUsers() {
+
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToUserResponse)
+                .toList();
+    }
+
+    // Get user by ID.
+    public UserResponseDto getUserById(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        return mapToUserResponse(user);
+    }
+
+
+    // Delete user by ID.
+    @Transactional
+    public void deleteUser(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        // Prevent deletion of SUPER_ADMIN.
+        if ("SUPER_ADMIN".equals(user.getRole().getName())) {
+            throw new IllegalArgumentException(
+                    "SUPER_ADMIN account cannot be deleted");
+        }
+
+        userRepository.delete(user);
+    }
+
+
+    // Convert User entity into response DTO.
+    private UserResponseDto mapToUserResponse(User user) {
+
+        UserResponseDto response = new UserResponseDto();
+
+        response.setId(user.getId());
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole().getName());
 
         return response;
     }

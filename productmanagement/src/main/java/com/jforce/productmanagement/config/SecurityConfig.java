@@ -75,9 +75,14 @@ public class SecurityConfig {
                         // ADMIN and SUPER_ADMIN
                         .requestMatchers("/api/products/**")
                         .hasAnyRole("ADMIN", "SUPER_ADMIN")
-
+                        //user can only access
+                                .requestMatchers("/api/cart/**").hasRole("USER")
+                        //
+                                .requestMatchers("/api/addresses/**").hasRole("USER")
                         .requestMatchers("/api/inventory/**")
+
                         .hasAnyRole("ADMIN", "SUPER_ADMIN")
+
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 );

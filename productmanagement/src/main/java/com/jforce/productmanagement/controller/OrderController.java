@@ -1,7 +1,7 @@
 package com.jforce.productmanagement.controller;
 import com.jforce.productmanagement.entity.Order;
-import com.jforce.productmanagement.service.OrderService;
 
+import com.jforce.productmanagement.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,5 +51,4 @@ public class OrderController {
                 orderService.getMyOrderById(orderId));
     }
 }
-
 

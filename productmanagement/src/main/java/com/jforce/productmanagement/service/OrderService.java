@@ -158,14 +158,16 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public Order getMyOrderById(Long orderId) {
-
+        // Get the currently logged-in user
         User user = getLoggedInUser();
-
+        // Find the order by ID
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-
+                .orElseThrow(() ->
+                        new RuntimeException("Order not found"));
+        // Verify that the order belongs to the logged-in user
         if (!order.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("You cannot access another user's order");
+            throw new RuntimeException(
+                    "You cannot access another user's order");
         }
 
         return order;
@@ -174,4 +176,6 @@ public class OrderService {
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
+
 }
+
